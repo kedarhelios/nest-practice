@@ -16,38 +16,40 @@ export class BookService {
     const description = String(query?.description) || '';
     const author = String(query?.author) || '';
     const category = String(query?.category) || '';
-    const page = (+query?.page as number) || 1;
-    const limit = +query?.limit as number;
-
-    const titleRegex = new RegExp(title, 'i');
-    const descriptionRegex = new RegExp(description, 'i');
-    const authorRegex = new RegExp(author, 'i');
-    const categoryRegex = new RegExp(category, 'i');
+    const price = +query?.price;
+    const page = +query?.page || 1;
+    const limit = +query?.limit;
 
     let mongoFinalQuery = {};
 
     if (query?.title)
       mongoFinalQuery = {
         ...mongoFinalQuery,
-        title: { $regex: titleRegex },
+        title: { $regex: title, $options: 'i' },
       };
 
     if (query?.description)
       mongoFinalQuery = {
         ...mongoFinalQuery,
-        description: { $regex: descriptionRegex },
+        description: { $regex: description, $options: 'i' },
       };
 
     if (query?.author)
       mongoFinalQuery = {
         ...mongoFinalQuery,
-        author: { $regex: authorRegex },
+        author: { $regex: author, $options: 'i' },
       };
 
     if (query?.category)
       mongoFinalQuery = {
         ...mongoFinalQuery,
-        category: { $regex: categoryRegex },
+        category: { $regex: category, $options: 'i' },
+      };
+
+    if (query?.price)
+      mongoFinalQuery = {
+        ...mongoFinalQuery,
+        price,
       };
 
     const books = await this.bookModel
