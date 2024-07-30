@@ -12,16 +12,46 @@ export class BookService {
   ) {}
 
   async findAll(query: ExpressQuery): Promise<Book[]> {
-    const search = (query?.search as string) || '';
+    const title = String(query?.title) || '';
+    const description = String(query?.description) || '';
+    const author = String(query?.author) || '';
+    const category = String(query?.category) || '';
     const page = (+query?.page as number) || 1;
-    const limit = (+query?.limit as number) || 2;
+    const limit = +query?.limit as number;
 
-    const searchRegex = new RegExp(search, 'i');
+    const titleRegex = new RegExp(title, 'i');
+    const descriptionRegex = new RegExp(description, 'i');
+    const authorRegex = new RegExp(author, 'i');
+    const categoryRegex = new RegExp(category, 'i');
+
+    let mongoFinalQuery = {};
+
+    if (query?.title)
+      mongoFinalQuery = {
+        ...mongoFinalQuery,
+        title: { $regex: titleRegex },
+      };
+
+    if (query?.description)
+      mongoFinalQuery = {
+        ...mongoFinalQuery,
+        description: { $regex: descriptionRegex },
+      };
+
+    if (query?.author)
+      mongoFinalQuery = {
+        ...mongoFinalQuery,
+        author: { $regex: authorRegex },
+      };
+
+    if (query?.category)
+      mongoFinalQuery = {
+        ...mongoFinalQuery,
+        category: { $regex: categoryRegex },
+      };
 
     const books = await this.bookModel
-      .find({
-        title: { $regex: searchRegex },
-      })
+      .find(mongoFinalQuery)
       .skip((page - 1) * limit)
       .limit(limit);
     return books;
