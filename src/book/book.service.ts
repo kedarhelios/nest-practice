@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Book } from './schemas/book.schema';
 import mongoose from 'mongoose';
@@ -64,14 +68,27 @@ export class BookService {
     return books;
   }
 
-  async findById(id: string): Promise<Book> {
+  async findById(id: number): Promise<Book> {
+    const isValid = mongoose.isValidObjectId(id);
+    if (!isValid)
+      throw new BadRequestException('Please provide a valid ObjectId');
+
     const book = await this.bookModel.findById(new mongoose.Types.ObjectId(id));
     if (!book) throw new NotFoundException('Book not found');
     return book;
   }
 
-  async updateById(id: string, book: Book): Promise<Book> {
-    return await this.bookModel.findByIdAndUpdate(
+  async updateById(id: string, book: Book): Promise<any> {
+    const isValid = mongoose.isValidObjectId(id);
+    if (!isValid)
+      throw new BadRequestException('Please provide a valid ObjectId');
+
+    const foundBook = await this.bookModel.findById(
+      new mongoose.Types.ObjectId(id),
+    );
+    if (!foundBook) throw new NotFoundException('Book not found');
+
+    const updated = await this.bookModel.updateOne(
       new mongoose.Types.ObjectId(id),
       book,
       {
@@ -79,9 +96,21 @@ export class BookService {
         runValidators: true,
       },
     );
+
+    return updated;
   }
 
   async deleteById(id: string) {
-    return await this.bookModel.deleteOne(new mongoose.Types.ObjectId(id));
+    const isValid = mongoose.isValidObjectId(id);
+    if (!isValid)
+      throw new BadRequestException('Please provide a valid ObjectId');
+
+    const result = await this.bookModel.deleteOne(
+      new mongoose.Types.ObjectId(id),
+    );
+
+    if (result.deletedCount <= 0) throw new NotFoundException('Book not found');
+
+    return { msg: 'Book deleted Successfully' };
   }
 }
