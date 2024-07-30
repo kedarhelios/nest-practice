@@ -12,7 +12,7 @@ import { Query as ExpressQuery } from 'express-serve-static-core';
 export class BookService {
   constructor(
     @InjectModel(Book.name)
-    private bookModel: mongoose.Model<Book>,
+    private BookModel: mongoose.Model<Book>,
   ) {}
 
   async findAll(query: ExpressQuery): Promise<Book[]> {
@@ -56,15 +56,14 @@ export class BookService {
         price,
       };
 
-    const books = await this.bookModel
-      .find(mongoFinalQuery)
+    const books = await this.BookModel.find(mongoFinalQuery)
       .skip((page - 1) * limit)
       .limit(limit);
     return books;
   }
 
   async create(book: Book): Promise<Book> {
-    const books = await this.bookModel.create(book);
+    const books = await this.BookModel.create(book);
     return books;
   }
 
@@ -73,7 +72,7 @@ export class BookService {
     if (!isValid)
       throw new BadRequestException('Please provide a valid ObjectId');
 
-    const book = await this.bookModel.findById(new mongoose.Types.ObjectId(id));
+    const book = await this.BookModel.findById(new mongoose.Types.ObjectId(id));
     if (!book) throw new NotFoundException('Book not found');
     return book;
   }
@@ -83,12 +82,12 @@ export class BookService {
     if (!isValid)
       throw new BadRequestException('Please provide a valid ObjectId');
 
-    const foundBook = await this.bookModel.findById(
+    const foundBook = await this.BookModel.findById(
       new mongoose.Types.ObjectId(id),
     );
     if (!foundBook) throw new NotFoundException('Book not found');
 
-    const updated = await this.bookModel.updateOne(
+    const updated = await this.BookModel.updateOne(
       new mongoose.Types.ObjectId(id),
       book,
       {
@@ -105,7 +104,7 @@ export class BookService {
     if (!isValid)
       throw new BadRequestException('Please provide a valid ObjectId');
 
-    const result = await this.bookModel.deleteOne(
+    const result = await this.BookModel.deleteOne(
       new mongoose.Types.ObjectId(id),
     );
 
