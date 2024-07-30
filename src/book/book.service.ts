@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Book } from './schemas/book.schema';
 import mongoose from 'mongoose';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Injectable()
 export class BookService {
@@ -10,8 +11,19 @@ export class BookService {
     private bookModel: mongoose.Model<Book>,
   ) {}
 
-  async findAll(): Promise<Book[]> {
-    const books = await this.bookModel.find();
+  async findAll(query: ExpressQuery): Promise<Book[]> {
+    const search = (query?.search as string) || '';
+    const page = (+query?.page as number) || 1;
+    const limit = (+query?.limit as number) || 2;
+
+    const searchRegex = new RegExp(search, 'i');
+
+    const books = await this.bookModel
+      .find({
+        title: { $regex: searchRegex },
+      })
+      .skip((page - 1) * limit)
+      .limit(limit);
     return books;
   }
 
