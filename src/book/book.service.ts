@@ -15,26 +15,13 @@ export class BookService {
     return books;
   }
 
-  async createBook({
-    title,
-    description,
-    author,
-    price,
-    category,
-  }: {
-    title: string;
-    description: string;
-    author: string;
-    price: string;
-    category: CATEGORY;
-  }): Promise<Book[]> {
-    const books = await this.bookModel.create(
-      title,
-      description,
-      author,
-      price,
-      category,
-    );
+  async create(book: Book): Promise<Book> {
+    const books = await this.bookModel.create(book);
     return books;
+  }
+
+  async findById(id: string): Promise<Book> {
+    const book = await this.bookModel.findById(new mongoose.Types.ObjectId(id));
+    return book;
   }
 }
