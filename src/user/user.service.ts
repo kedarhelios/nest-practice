@@ -16,10 +16,6 @@ export class UserService {
     private userModel: mongoose.Model<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    return await this.userModel.create(createUserDto);
-  }
-
   async findAll() {
     const foundUsers = await this.userModel.find();
 
